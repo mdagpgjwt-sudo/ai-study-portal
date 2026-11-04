@@ -1,0 +1,8 @@
+<PARSED TEXT FOR SHEET: 1 / 1 TABS
+TAB NAME: sample_orders.csv>
+index,order_id,customer,amount_yen,date
+0,1.0,架空商事,12000,2026-11-01
+1,2.0,テスト工業,8500,2026-11-02
+2,2.0,テスト工業,8500,2026-11-02
+3,4.0,模擬サービス,-100,2026-11-03
+4,,デモ商店,3900,invalid
