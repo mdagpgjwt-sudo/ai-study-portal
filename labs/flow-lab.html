@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>FLOW LAB | 自動化システムを壊して直す</title>
+<meta name="description" content="業務自動化の失敗を再現し、検証・重複防止・承認・再試行を学ぶ実践シミュレーター">
+<style>
+:root{font-family:Inter,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;color:#e9f1fc;background:#0a1122;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse 55% 38% at 75% 0%,#172d55 0,transparent 100%),#0a1122;min-height:100vh}button,input{font:inherit}button{cursor:pointer}a{color:#93c5fd}a:hover{color:#dbeafe}
+.topbar{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:24px 24px 6px;gap:12px}
+.brand{font-weight:900;letter-spacing:.11em;font-size:14px;color:white;display:flex;align-items:center;gap:10px}.brand i{font-style:normal;background:#5c9aff;color:#081126;padding:8px 10px;border-radius:12px}.topbar a{font-size:13px;text-decoration:none;color:#bbd3f2;border:1px solid #344562;border-radius:9px;padding:9px 12px}
+main{max-width:1200px;margin:auto;padding:20px 24px 64px}
+.eyebrow{font-size:11px;letter-spacing:.13em;font-weight:800;text-transform:uppercase;color:#75bdfb;margin-bottom:14px}
+.hero{padding:22px 0 20px}.hero h1{font-size:clamp(27px,4.6vw,51px);letter-spacing:-.06em;line-height:1.15;margin:0 0 17px;font-weight:900}.hero h1 em{font-style:normal;color:#8bb9ff}.hero p{max-width:790px;color:#a5b6d0;line-height:1.9;margin:0;font-size:15px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #344767;background:#13233d;border-radius:50px;padding:6px 10px;font-size:11px;font-weight:800;color:#b8dcfd}
+.section-title{font-weight:850;font-size:17px;letter-spacing:-.03em;margin:0 0 14px}
+.scenarios{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 25px}
+.scenario{border:1px solid #33445f;background:#131f34;border-radius:16px;padding:16px;text-align:left;color:inherit;min-height:116px;transition:transform .12s,border-color .12s,background .12s}
+.scenario:hover{transform:translateY(-2px);border-color:#668fc9}.scenario.active{border:2px solid #7fb5ff;padding:15px;background:#1a3152}
+.scenario .emoji{font-size:22px;display:inline-block;margin-right:8px}.scenario b{display:block;font-size:15px;margin:10px 0 7px}.scenario small{font-size:12px;color:#9aadc7;line-height:1.6;display:block}
+.layout{display:grid;grid-template-columns:360px minmax(0,1fr);gap:18px;align-items:start}.panel{border:1px solid #2c3a53;background:#111b2d;border-radius:18px;padding:21px}
+.subline{color:#9daec4;line-height:1.8;font-size:12px;margin:-4px 0 18px}
+.option{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-top:1px solid #27364d;cursor:pointer}
+.option input{appearance:none;width:38px;min-width:38px;height:22px;border-radius:999px;background:#354561;position:relative;margin:1px 0 0;transition:background .15s}
+.option input:before{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:100%;background:#d5e0ec;transition:transform .15s}
+.option input:checked{background:#3c92df}.option input:checked:before{transform:translateX(16px);background:white}
+.option strong{display:block;font-size:13px;margin:0 0 4px}.option span{display:block;color:#9daec4;font-size:12px;line-height:1.65}
+.button{border:0;border-radius:11px;background:#76b6ff;color:#071426;padding:14px 16px;font-weight:850;font-size:14px;transition:filter .15s}.button:hover{filter:brightness(1.13)}
+.button.secondary{background:#1d304a;color:#c6d7ed;border:1px solid #344a6c}.button.outline{background:transparent;border:1px solid #3a526f;color:#c8dcfa}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.btnrow .button:first-child{grid-column:span 2}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric{background:#152238;border:1px solid #2a3c57;border-radius:13px;padding:15px;min-width:0}.metric small{display:block;font-size:11px;color:#9eb2cd;margin-bottom:8px}.metric b{font-size:25px;letter-spacing:-.04em}
+.blue{color:#89c2ff}.green{color:#64dbb4}.red{color:#ff8f9e}.amber{color:#ffd180}
+.flow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:19px 0}.step{border:1px solid #324660;border-radius:10px;padding:9px 11px;background:#182840;font-size:11px;color:#d1e4fa;white-space:nowrap}.arrow{font-size:13px;color:#6586ad}
+.footnote{font-size:12px;color:#a1b3ce;line-height:1.8;background:#15263e;border:1px solid #314766;padding:11px 13px;border-radius:10px}
+.resultbox{margin-top:18px}.result-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 11px;flex-wrap:wrap}
+.table-wrap{overflow-x:auto;border:1px solid #2b3c56;border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:590px}th{text-align:left;font-size:11px;letter-spacing:.03em;color:#a9bbd4;background:#19273c;padding:11px 12px}td{border-top:1px solid #2a3a52;padding:12px;vertical-align:top;color:#d8e3f3;line-height:1.65}td .minor{display:block;color:#9eaec5;font-size:11px;margin-top:3px}
+.mark{font-size:11px;border-radius:20px;padding:4px 8px;font-weight:800;display:inline-block;white-space:nowrap}.ok{background:#143c35;color:#76edbe}.bad{background:#4b2638;color:#ff9fae}.hold{background:#44351d;color:#f8ce77}.skip{background:#223d55;color:#99cff9}
+.lesson{margin-top:18px}.lesson h3{font-size:15px;margin:0 0 12px}.explanation{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.explain-card{border-radius:12px;padding:16px;background:#14233a;border:1px solid #2b3c55}.explain-card b{font-size:13px;display:block;margin-bottom:8px}.explain-card p{margin:0;font-size:12px;color:#abc0d9;line-height:1.85}
+.next{margin-top:18px;padding:20px;border:1px solid #345476;background:linear-gradient(115deg,#162e4c,#10213b);border-radius:17px}.next h2{font-size:18px;margin:0 0 10px}.next p{font-size:13px;color:#b8cce4;line-height:1.85;margin:0 0 13px}
+ol{padding-left:23px;font-size:13px;color:#c8daed;line-height:2.1}code{background:#223753;border-radius:5px;padding:2px 5px;color:#b8d9ff}
+.small{font-size:11px;color:#8195b1}
+.hidden{display:none!important}
+@media(max-width:860px){.layout{grid-template-columns:1fr}.scenarios{grid-template-columns:1fr}.scenario{min-height:auto}.explanation{grid-template-columns:1fr}.topbar{padding:18px 16px 0}main{padding:16px 16px 45px}.hero{padding-top:14px}}
+@media(max-width:500px){.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.metric{padding:11px}.metric b{font-size:20px}.metric small{font-size:10px}.panel{padding:16px}.flow{gap:4px}.step{padding:8px}.btnrow{grid-template-columns:1fr}.btnrow .button:first-child{grid-column:auto}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="brand"><i>FL</i> FLOW LAB <span class="pill">MISSION 01</span></div><a href="../index.html">← 90日学習ポータル</a></header>
+<main>
+<section class="hero"><div class="eyebrow">Build · Break · Improve</div><h1>失敗する仕組みを作って、<br><em>失敗しない設計に変える。</em></h1><p>業務自動化の「なぜ必要？」を実験で理解する。架空のデータを処理し、二重登録・金額誤り・通信断などを発生させて、守りの仕組みを組み立てよう。実際のAI/APIには接続しない、安全なシミュレーター。</p></section>
+<section aria-labelledby="choose-title"><h2 id="choose-title" class="section-title">01 / 業務シナリオを選ぶ</h2><div class="scenarios" id="scenarios"></div></section>
+<div class="layout">
+<aside class="panel"><h2 class="section-title">02 / 防御機能を設計する</h2><p class="subline">スイッチを入れると、処理ルールが変わる。どの機能がどの事故を防ぐのか予想してから実行しよう。</p>
+<div id="options"></div>
+<div class="btnrow"><button id="run" class="button">▶ バッチを実行して検証</button><button id="weak" class="button secondary">危険な構成</button><button id="safe" class="button secondary">防御を全て有効化</button></div>
+<p class="small">スコアは7件の正しい扱い方の一致率。自動化の正しさを測る練習用の指標で、実業務の精度を示すものではありません。</p>
+</aside>
+<section class="panel" aria-labelledby="result-title">
+<div class="result-header"><h2 id="result-title" class="section-title">03 / 実行結果</h2><span class="pill" id="runs">実験 0回</span></div>
+<div class="metrics"><div class="metric"><small>正しく処理</small><b id="correct" class="green">—</b></div><div class="metric"><small>設計ミス</small><b id="mistakes" class="red">—</b></div><div class="metric"><small>一致率 / 最高</small><b id="score" class="blue">—</b></div></div>
+<div class="flow"><span class="step">受信</span><span class="arrow">→</span><span class="step">形式検証</span><span class="arrow">→</span><span class="step">業務ルール</span><span class="arrow">→</span><span class="step">承認</span><span class="arrow">→</span><span class="step">書込・再試行</span></div>
+<div class="footnote" id="summary">最初に現在の設定で実行してみよう。間違えた項目は「なぜ起きたか」まで表示される。</div>
+<div class="resultbox"><div class="result-header"><h3 style="font-size:14px;margin:0">7件の処理トレース</h3><button id="export" class="button outline" disabled>結果JSONを保存</button></div><div class="table-wrap"><table><thead><tr><th>データ</th><th>起きたこと</th><th>結果</th><th>判定理由</th></tr></thead><tbody id="rows"><tr><td colspan="4" style="text-align:center;color:#91a9c5">未実行です</td></tr></tbody></table></div></div>
+</section>
+</div>
+<section class="lesson"><h2 class="section-title">プロの視点：この仕組みが必要な理由</h2><div class="explanation">
+<div class="explain-card"><b>形式検証 ≠ 内容の正確性</b><p>JSONとして整っていても、請求金額や送信先が間違っている場合がある。型・必須項目の検証と、業務ルールによる整合性検証は別物。LLM出力にも同じ区別が必要。</p></div>
+<div class="explain-card"><b>タイムアウト ≠ 失敗確定</b><p>外部APIへの登録後、応答だけが失われることがある。そこで無条件に再送すると二重登録が発生し得る。冪等キーや処理状態照会を使って安全に回復する。</p></div>
+<div class="explain-card"><b>AIに禁止を命じるだけでは防げない</b><p>取込文書に「別の場所に情報を送れ」と書いてあっても、それは信頼しない入力データ。承認だけに依存せず、サーバー側で操作権限を限定する必要がある。</p></div>
+<div class="explain-card"><b>業務自動化は「成功」だけ見ても足りない</b><p>正しいものを通し、危険なものを止め、止めた理由を説明できることが必要。処理結果、エラー原因、再実行履歴を残すことが、実務での保守につながる。</p></div>
+</div></section>
+<section class="next"><span class="pill">NEXT CHALLENGE</span><h2>30分で、シミュレーターを現実の開発へ近づける</h2><p>これは「仕組みを理解する第1段階」。次は本当に入力ファイルを扱う小さなプログラムへ発展させる。まずは、あえて危険な構成で実行 → どこで事故が起きるか予測 → 防御機能を1つずつ追加して一致率100%にする。</p><ol><li><strong>予測：</strong>通信断で二重登録が起きる条件を自分の言葉で説明する。</li><li><strong>実験：</strong>スイッチを1つずつ切り替えて、結果が変わることを確かめる。</li><li><strong>実装：</strong>次の作品ではPythonでCSVを読み、<code>invoice_id</code>の重複を検知する関数を作る。</li></ol><div class="small">ソース：<a href="https://github.com/mdagpgjwt-sudo/ai-study-portal/blob/main/labs/flow-lab.html" target="_blank" rel="noopener noreferrer">このページのコードを見る</a></div></section>
+</main>
+<script>
+(function(){
+"use strict";
+var descriptions={
+schema:{title:"必須項目・形式の検証",body:"金額の欠落・型の不一致を処理前に保留する。"},
+consistency:{title:"業務ルールの整合性検証",body:"請求内訳と合計額などが一致するか確認する。"},
+dedupe:{title:"重複する入力の排除",body:"同じIDを二度登録しないようにする。"},
+approval:{title:"不審な操作の承認",body:"外部文書内の指示を勝手に実行せず保留する。"},
+retry:{title:"応答がない処理を再試行",body:"通信断でも業務を継続する。ただし二重登録に注意。"},
+idempotency:{title:"再試行時の冪等性",body:"同じ処理キーなら追加登録せず、元の結果を返す。"}
+};
+var titles={
+invoice:{icon:"🧾",name:"請求書登録",desc:"金額不一致・二重請求・通信断を防ぐ"},
+customer:{icon:"📇",name:"顧客管理",desc:"空欄・二重顧客・承認漏れを防ぐ"},
+report:{icon:"📊",name:"業務報告",desc:"整合性のない報告や二重登録を防ぐ"}
+};
+var data={
+invoice:[
+{id:"INV-101",label:"正常な請求書",type:"normal",key:"inv-101"},
+{id:"INV-102",label:"同じ請求書の再送",type:"duplicate",key:"inv-101"},
+{id:"INV-103",label:"税額と合計の不一致",type:"mismatch",key:"inv-103"},
+{id:"INV-104",label:"請求金額が欠落",type:"missing",key:"inv-104"},
+{id:"INV-105",label:"登録後にAPI応答が消失",type:"timeout",key:"inv-105"},
+{id:"INV-106",label:"書類に外部転送の命令が混入",type:"untrusted",key:"inv-106"},
+{id:"INV-107",label:"正常な請求書（追加）",type:"normal",key:"inv-107"}],
+customer:[
+{id:"CRM-201",label:"正常な顧客登録",type:"normal",key:"crm-201"},
+{id:"CRM-202",label:"同じ顧客を再送",type:"duplicate",key:"crm-201"},
+{id:"CRM-203",label:"住所コードと都道府県の不一致",type:"mismatch",key:"crm-203"},
+{id:"CRM-204",label:"顧客IDが欠落",type:"missing",key:"crm-204"},
+{id:"CRM-205",label:"登録直後に応答が切断",type:"timeout",key:"crm-205"},
+{id:"CRM-206",label:"入力コメントに外部転送指示",type:"untrusted",key:"crm-206"},
+{id:"CRM-207",label:"正常な顧客登録（追加）",type:"normal",key:"crm-207"}],
+report:[
+{id:"LOG-301",label:"正常な日報",type:"normal",key:"log-301"},
+{id:"LOG-302",label:"同じ日報が二度届く",type:"duplicate",key:"log-301"},
+{id:"LOG-303",label:"作業時間の合計が合わない",type:"mismatch",key:"log-303"},
+{id:"LOG-304",label:"担当部署が未記入",type:"missing",key:"log-304"},
+{id:"LOG-305",label:"登録後にAPI応答が消失",type:"timeout",key:"log-305"},
+{id:"LOG-306",label:"報告文に権限変更の指示",type:"untrusted",key:"log-306"},
+{id:"LOG-307",label:"正常な日報（追加）",type:"normal",key:"log-307"}]
+};
+var opts={schema:true,consistency:false,dedupe:false,approval:false,retry:true,idempotency:false};
+var scenario="invoice", last=null,runCount=0,best={invoice:0,customer:0,report:0};
+try{var saved=JSON.parse(localStorage.getItem("flowlab-v1")||"null");if(saved&&saved.best)best=Object.assign(best,saved.best);if(saved&&saved.runs)runCount=saved.runs}catch(e){}
+function $(id){return document.getElementById(id)}
+function el(tag,cls,content){var n=document.createElement(tag);if(cls)n.className=cls;if(content!==undefined)n.textContent=content;return n}
+function save(){try{localStorage.setItem("flowlab-v1",JSON.stringify({best:best,runs:runCount}))}catch(e){}}
+function setScenario(s){scenario=s;last=null;drawScenarios();drawResults()}
+function drawScenarios(){var root=$("scenarios");root.innerHTML="";Object.keys(titles).forEach(function(k){var v=titles[k],b=el("button","scenario"+(k===scenario?" active":""));b.type="button";b.setAttribute("aria-pressed",k===scenario?"true":"false");var a=el("span","emoji",v.icon),n=el("b","",v.name),d=el("small","",v.desc);b.append(a,n,d);b.onclick=function(){setScenario(k)};root.appendChild(b)})}
+function drawOptions(){var root=$("options");root.innerHTML="";Object.keys(descriptions).forEach(function(k){var d=descriptions[k],lb=el("label","option");var input=el("input");input.type="checkbox";input.checked=!!opts[k];input.setAttribute("aria-label",d.title);input.onchange=function(){opts[k]=input.checked};var body=el("div");body.append(el("strong","",d.title),el("span","",d.body));lb.append(input,body);root.appendChild(lb)})}
+function processRecords(){
+var records=data[scenario],outputs=[],writtenKeys=new Set();
+records.forEach(function(rec){
+var status="write",detail="通常の登録処理。",times=0;
+if(rec.type==="duplicate"&&opts.dedupe&&writtenKeys.has(rec.key)){status="skip";detail="登録済みIDのため入力を除外。"}
+else if(rec.type==="missing"&&opts.schema){status="hold";detail="必須項目がないので処理を保留。"}
+else if(rec.type==="mismatch"&&opts.consistency){status="hold";detail="業務ルールの不整合を検知して保留。"}
+else if(rec.type==="untrusted"&&opts.approval){status="hold";detail="取込データ内の操作指示を信頼せず、人間の判断に回した。"}
+else if(rec.type==="timeout"){
+times=1;writtenKeys.add(rec.key);
+if(!opts.retry){status="unknown";detail="登録後に応答が消えた。状態が未確定なので照会が必要。"}
+else if(opts.idempotency){status="write";detail="同じ冪等キーで再試行。二重登録されず1件だけ記録。"}
+else{status="write";times=2;detail="応答が消えたため再送し、同じレコードを二重登録してしまった。"}
+}else{
+times=1;writtenKeys.add(rec.key);
+if(rec.type==="missing")detail="欠落データを検証せず登録してしまった。";
+if(rec.type==="mismatch")detail="矛盾した内容を検証せず登録してしまった。";
+if(rec.type==="untrusted")detail="信頼しない文書の操作指示を適切に隔離できなかった。";
+if(rec.type==="duplicate")detail="同じIDをもう一度書き込んでしまった。";
+}
+var expected=rec.type==="duplicate"?"skip":rec.type==="missing"||rec.type==="mismatch"||rec.type==="untrusted"?"hold":"write";
+var correct=status===expected&&(status!=="write"||times===1);
+outputs.push({id:rec.id,label:rec.label,type:rec.type,actual:status,expected:expected,writes:times,correct:correct,detail:detail});
+});
+return outputs;
+}
+function mark(r){if(r.correct){if(r.actual==="hold")return '<span class="mark hold">保留 ✓</span>';if(r.actual==="skip")return '<span class="mark skip">重複除外 ✓</span>';return '<span class="mark ok">正常 ✓</span>'}return '<span class="mark bad">問題あり ×</span>'}
+function drawResults(){
+$("runs").textContent="実験 "+runCount+"回";
+if(!last){$("correct").textContent="—";$("mistakes").textContent="—";$("score").textContent="—";$("summary").textContent="実行すると、"+titles[scenario].name+"の7件を処理し、どこで事故が起こるかを確認できます。最高記録: "+best[scenario]+"%。";$("rows").innerHTML='<tr><td colspan="4" style="text-align:center;color:#91a9c5">未実行です</td></tr>';$("export").disabled=true;return}
+var correct=last.records.filter(function(r){return r.correct}).length;
+var score=Math.round(correct/last.records.length*100);
+$("correct").textContent=String(correct)+"/7";$("mistakes").textContent=String(7-correct);$("score").textContent=score+"%";
+$("summary").textContent=score===100?"全件を期待どおりに処理できました。ただし、この例題は7件だけです。実際の業務では追加の異常系やセキュリティ試験が必要です。":"期待と異なる処理が "+(7-correct)+" 件ありました。結果の「判定理由」を読んで、どの防御機能を有効にすれば改善するか試そう。最高記録: "+best[scenario]+"%。";
+var root=$("rows");root.innerHTML="";
+last.records.forEach(function(r){
+var tr=el("tr");var c1=el("td");c1.append(el("b","",r.id),el("span","minor",r.type));
+var c2=el("td","",r.label),c3=el("td");c3.innerHTML=mark(r);var c4=el("td","",r.detail);tr.append(c1,c2,c3,c4);root.appendChild(tr)
+});$("export").disabled=false;
+}
+function run(){
+var records=processRecords(),success=records.filter(function(r){return r.correct}).length;
+var score=Math.round(success/records.length*100);
+runCount++;best[scenario]=Math.max(best[scenario],score);last={scenario:scenario,options:Object.assign({},opts),records:records,score:score,timestamp:new Date().toISOString()};save();drawResults();
+}
+function saveJSON(){if(!last)return;var content=JSON.stringify(last,null,2),blob=new Blob([content],{type:"application/json;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="flow-lab-"+last.scenario+"-"+Date.now()+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+$("run").addEventListener("click",run);
+$("export").addEventListener("click",saveJSON);
+$("weak").addEventListener("click",function(){opts={schema:false,consistency:false,dedupe:false,approval:false,retry:true,idempotency:false};drawOptions();last=null;drawResults()});
+$("safe").addEventListener("click",function(){opts={schema:true,consistency:true,dedupe:true,approval:true,retry:true,idempotency:true};drawOptions();last=null;drawResults()});
+drawScenarios();drawOptions();drawResults();
+})();
+</script>
+</body></html>
